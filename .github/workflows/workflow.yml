@@ -40,7 +40,7 @@ jobs:
         run: | # pwsh
           git clone --depth 1 --branch ${{ steps.gtest-tag.outputs.release }} https://github.com/google/googletest.git "${{ env.strDirGTest }}"
 
-      - name: Build and run all tests in loop
+      - name: Build and run all tests
         run: | # pwsh
           $arrSources = @( 
             'main.cpp'
@@ -55,7 +55,7 @@ jobs:
 
           $pathMSBuild = vswhere -products * -requires Microsoft.Component.MSBuild -property installationPath -latest;
 
-          if ( 'x64' -eq ${{ matrix.arch }} ) {
+          if ( 'x64' -eq '${{ matrix.arch }}' ) {
             $path = join-path $pathMSBuild 'VC/Auxiliary/Build/vcvars64.bat';
           }
           else {
@@ -66,19 +66,19 @@ jobs:
             $null = new-item -force -path "Env:\$($Matches[1])" -value $Matches[2];
           }
 
-          if ( 'msvc' -eq ${{ matrix.cc }} ) {
+          if ( 'msvc' -eq '${{ matrix.cc }}' ) {
             $exe = 'cl';
             $building = '/MP ';
-            if ( 'max' -eq ${{ matrix.opt }} ) {
+            if ( 'max' -eq '${{ matrix.opt }}' ) {
               $building += " /Gy /O2 /GL ";
             }
-          } elseif ( 'llvm' -eq ${{ matrix.cc }} ) {
+          } elseif ( 'llvm' -eq '${{ matrix.cc }}' ) {
             $exe = 'clang-cl';
             $building = '-Wno-ignored-pragma-optimize -Wno-microsoft-include -Wno-microsoft-cast -fms-compatibility -fms-extensions ';
-            if ( 'x86' -eq ${{ matrix.arch }} ) {
+            if ( 'x86' -eq '${{ matrix.arch }}' ) {
               $building += " -m32 ";
             }
-            if ( 'max' -eq ${{ matrix.opt }} ) {
+            if ( 'max' -eq '${{ matrix.opt }}' ) {
               $building += " /Gy /O2 -flto -fuse-ld=lld ";
             }
           }
@@ -95,7 +95,7 @@ jobs:
             " /machine:${{ matrix.arch }} " + 
             '')
           ; # for linker
-          if ( ( 'msvc' -eq ${{ matrix.cc }} ) -And ( 'max' -eq ${{ matrix.opt }} ) ) {
+          if ( ( 'msvc' -eq '${{ matrix.cc }}' ) -And ( 'max' -eq '${{ matrix.opt }}' ) ) {
             $building += " /LTCG:incremental ";
           }
           echo "arch=${{ matrix.arch }}, cc=${{ matrix.cc }} std=${{ matrix.std }}, optimize=${{ matrix.opt }}, exe=$exe";
